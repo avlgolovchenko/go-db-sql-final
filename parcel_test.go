@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"errors"
 	"math/rand"
 	"testing"
 	"time"
@@ -59,6 +60,7 @@ func TestAddGetDelete(t *testing.T) {
 	// проверьте, что посылку больше нельзя получить из БД
 	_, err = store.Get(id)
 	require.Error(t, err)
+	require.True(t, errors.Is(err, sql.ErrNoRows))
 }
 
 // TestSetAddress проверяет обновление адреса
@@ -136,9 +138,9 @@ func TestGetByClient(t *testing.T) {
 
 	// задаём всем посылкам один и тот же идентификатор клиента
 	client := randRange.Intn(10_000_000)
-	parcels[0].Client = client
-	parcels[1].Client = client
-	parcels[2].Client = client
+	for i := 0; i < len(parcels); i++ {
+		parcels[i].Client = client
+	}
 
 	// add
 	for i := 0; i < len(parcels); i++ {
